@@ -19,7 +19,18 @@ public class SpawnZoneScript : MonoBehaviour
     [SerializeField] float spaceBetweenLetters = 0.5f;
     
     Dictionary<string, GameObject> prefabs;
-    string lastCharacter = "";
+    Dictionary<string, string> specialCharacters =  new Dictionary<string, string>
+    {
+        { ".", "dot" },
+        { "/", "lomitko"},
+        { ":", "dvojbodka"},
+        { ")", "bracket_end"},
+        { "\"", "quotations"},
+        { "(", "bracket_start"},
+        { "?", "question_mark"},
+    };
+
+    int quotations_count = 0;
 
     void Start() {
         string[] prefabPaths = Directory.GetFiles("Assets/Resources/Letters", "*.prefab");
@@ -34,7 +45,7 @@ public class SpawnZoneScript : MonoBehaviour
             {
                 string letter = prefab.name;
                 prefabs.Add(letter, prefab);
-                Debug.Log(letter);
+                // Debug.Log(letter);
             }
             else
             {
@@ -78,8 +89,9 @@ public class SpawnZoneScript : MonoBehaviour
     private void SpawnCharacter(string character, Vector3 startPosition, int index)
     {
         int scaleFactor = 165;
-        // if (lastCharacter.Length == 2)
-        //     scaleFactor = 110;
+        character = specialCharacters.ContainsKey(character)
+            ? GetSpecialCharacterPrefabName(character)
+            : character;
 
         Vector3 letterPosition = new Vector3(startPosition.x + (spaceBetweenLetters + letterSize.x / scaleFactor) * index, startPosition.y, startPosition.z);
         GameObject instantiatedPrefab = Instantiate(prefabs[character], letterPosition, Quaternion.Euler(0, 180, 0));
@@ -90,12 +102,13 @@ public class SpawnZoneScript : MonoBehaviour
         manipulationScript.stepSize = sizeStep;
 
         // Debug.Log($"Character '{character}' instantiated at: {letterPosition}");
-        lastCharacter = character;
     }
-
-    private bool IsSpecialDoubleCharacter(string doubleChar)
-    {
-        return doubleChar == "CH" || doubleChar == "DZ" || doubleChar == "DŽ";
+    string GetSpecialCharacterPrefabName(string specialCharacter) {
+        if (specialCharacter == "\"") {
+            quotations_count++; 
+            return specialCharacters[specialCharacter]+((quotations_count % 2) + 1).ToString();
+        }
+        return specialCharacters[specialCharacter];
     }
 
     Vector3 CalculateStartPosition(int stringLength) {
