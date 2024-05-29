@@ -2853,6 +2853,7 @@ MonoBehaviour:
   timeBeforeFall: 5
   spaceBetweenLetters: 0.01
   useFixed: 1
+  alphabetPrefabs: {fileID: 11400000, guid: b80d33cd8c4e48a4d94be1820703b3ac, type: 2}
 --- !u!1 &1580772792
 GameObject:
   m_ObjectHideFlags: 0

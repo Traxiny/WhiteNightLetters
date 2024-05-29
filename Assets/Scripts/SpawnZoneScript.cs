@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using System;
+using UnityEditor;
 
 public class SpawnZoneScript : MonoBehaviour
 {
@@ -19,6 +19,7 @@ public class SpawnZoneScript : MonoBehaviour
     [SerializeField] float spaceBetweenLetters = 0.5f;
     [Tooltip("Use or old new letters")]
     [SerializeField] bool useFixed = true;
+    [SerializeField] PrefabList alphabetPrefabs;
 
     Dictionary<string, GameObject> prefabs;
     Dictionary<string, string> specialCharacters =  new Dictionary<string, string>
@@ -41,29 +42,12 @@ public class SpawnZoneScript : MonoBehaviour
 
     int quotations_count = 0;
 
-    void Start() {
-        string[] prefabPaths = useFixed 
-            ? Directory.GetFiles("Assets/Resources/Letters-Fixed", "*.prefab") 
-            : Directory.GetFiles("Assets/Resources/Letters", "*.prefab");
-        
+    void Awake() {
         prefabs = new();
-
-        foreach (string path in prefabPaths)
+        foreach (GameObject prefab in alphabetPrefabs.prefabs)
         {
-            string prefabName = Path.GetFileNameWithoutExtension(path);
-            GameObject prefab = useFixed 
-                ? Resources.Load<GameObject>("Letters-Fixed/" + prefabName)
-                : Resources.Load<GameObject>("Letters/" + prefabName);
-            if (prefab != null)
-            {
-                string letter = prefab.name;
-                prefabs.Add(letter, prefab);
-                // Debug.Log(letter);
-            }
-            else
-            {
-                Debug.LogWarning("Failed to load prefab at path: " + path);
-            }
+            prefabs[prefab.name] = prefab;
+            // Debug.Log(prefab.name);
         }
     }
 
