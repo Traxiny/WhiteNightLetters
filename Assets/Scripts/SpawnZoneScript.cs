@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using UnityEngine.Analytics;
+using System;
 
 public class SpawnZoneScript : MonoBehaviour
 {
@@ -17,30 +17,43 @@ public class SpawnZoneScript : MonoBehaviour
     [SerializeField] float timeBeforeFall = 5.0f;
     [Tooltip("Modify this so the letters are readable")]
     [SerializeField] float spaceBetweenLetters = 0.5f;
-    
+    [Tooltip("Use or old new letters")]
+    [SerializeField] bool useFixed = true;
+
     Dictionary<string, GameObject> prefabs;
     Dictionary<string, string> specialCharacters =  new Dictionary<string, string>
     {
-        { ".", "dot" },
+        { ".", "tecka" },
+        { ",", "carka" },
+        { "?", "otaznik"},
+        { "-", "pomlcka"},
+        { "–", "pomlcka"},
         { "/", "lomitko"},
-        { ":", "dvojbodka"},
-        { ")", "bracket_end"},
-        { "\"", "quotations"},
-        { "(", "bracket_start"},
-        { "?", "question_mark"},
+        { "(", "zavorka1"},
+        { ")", "zavorka2"},
+        {"„", "uvozovky1"},
+        {"“", "uvozovky2"},
+        { "!", "vykricnik"},
+        { "\"", "uvozovky"},
+        { ":", "dvojtecka"},
+        { ";", "carka_dvojtecka"},
     };
 
     int quotations_count = 0;
 
     void Start() {
-        string[] prefabPaths = Directory.GetFiles("Assets/Resources/Letters", "*.prefab");
+        string[] prefabPaths = useFixed 
+            ? Directory.GetFiles("Assets/Resources/Letters-Fixed", "*.prefab") 
+            : Directory.GetFiles("Assets/Resources/Letters", "*.prefab");
         
         prefabs = new();
 
         foreach (string path in prefabPaths)
         {
             string prefabName = Path.GetFileNameWithoutExtension(path);
-            GameObject prefab = Resources.Load<GameObject>("Letters/" + prefabName);
+            GameObject prefab = useFixed 
+                ? Resources.Load<GameObject>("Letters-Fixed/" + prefabName)
+                : Resources.Load<GameObject>("Letters/" + prefabName);
             if (prefab != null)
             {
                 string letter = prefab.name;
@@ -68,6 +81,9 @@ public class SpawnZoneScript : MonoBehaviour
                 letterPositionIndex++;
                 continue;
             }
+            if (input[i] == '\n'){
+                continue;
+            }
 
             //TODO ch, dz, dž -> very bad calculations of space
             // if (i + 1 < input.Length - 1)
@@ -92,7 +108,9 @@ public class SpawnZoneScript : MonoBehaviour
         character = specialCharacters.ContainsKey(character)
             ? GetSpecialCharacterPrefabName(character)
             : character;
-
+        character = useFixed 
+            ? character+"-fixed" 
+            : character;
         Vector3 letterPosition = new Vector3(startPosition.x + (spaceBetweenLetters + letterSize.x / scaleFactor) * index, startPosition.y, startPosition.z);
         GameObject instantiatedPrefab = Instantiate(prefabs[character], letterPosition, Quaternion.Euler(0, 180, 0));
         LetterManipulation manipulationScript = instantiatedPrefab.AddComponent<LetterManipulation>();
@@ -124,9 +142,9 @@ public class SpawnZoneScript : MonoBehaviour
     }
 
     Vector3 GetRandomPosition() {
-        float randomX = Random.Range(transform.position.x - spawnZoneArea.x / 2, transform.position.x + spawnZoneArea.x / 2);
-        float randomY = Random.Range(transform.position.y - spawnZoneArea.y / 2, transform.position.y + spawnZoneArea.y / 2);
-        float randomZ = Random.Range(transform.position.z - spawnZoneArea.z / 2, transform.position.z + spawnZoneArea.z / 2);
+        float randomX = UnityEngine.Random.Range(transform.position.x - spawnZoneArea.x / 2, transform.position.x + spawnZoneArea.x / 2);
+        float randomY = UnityEngine.Random.Range(transform.position.y - spawnZoneArea.y / 2, transform.position.y + spawnZoneArea.y / 2);
+        float randomZ = UnityEngine.Random.Range(transform.position.z - spawnZoneArea.z / 2, transform.position.z + spawnZoneArea.z / 2);
         return new Vector3(randomX, randomY, randomZ);
     }
 
