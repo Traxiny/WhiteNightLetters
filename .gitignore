@@ -73,3 +73,5 @@ crashlytics-build.properties
 
 # Videomaping cause it is too big
 Assets/Videomaping
+
+.vscode/*
